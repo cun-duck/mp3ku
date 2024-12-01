@@ -4,3 +4,4 @@ pydub
 ffmpeg-python
 yt-dlp
 imageio
+requests
