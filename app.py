@@ -1,20 +1,14 @@
 import os
-import shutil
 import streamlit as st
 import yt_dlp
+import ffmpeg  # Gunakan pustaka ffmpeg-python
 
-# Pastikan FFmpeg tersedia
-ffmpeg_path = shutil.which("ffmpeg")
-if ffmpeg_path is None:
-    raise EnvironmentError("FFmpeg tidak ditemukan. Pastikan FFmpeg terinstal di lingkungan Anda.")
-os.environ["PATH"] += os.pathsep + os.path.dirname(ffmpeg_path)
-
-# Fungsi untuk mengunduh dan mengonversi video YouTube menjadi MP3
+# Fungsi untuk mengunduh audio dari YouTube
 def download_youtube_audio(url, output_folder="downloads"):
     if not os.path.exists(output_folder):
         os.makedirs(output_folder)
 
-    # Konfigurasi yt-dlp
+    # Konfigurasi yt-dlp untuk mengunduh audio dalam format terbaik
     ydl_opts = {
         'format': 'bestaudio/best',
         'outtmpl': f'{output_folder}/%(title)s.%(ext)s',
@@ -31,7 +25,7 @@ def download_youtube_audio(url, output_folder="downloads"):
             mp3_file = os.path.join(output_folder, f"{info['title']}.mp3")
             return mp3_file
     except Exception as e:
-        st.error(f"Terjadi kesalahan: {e}")
+        st.error(f"Terjadi kesalahan saat mengunduh: {e}")
         return None
 
 # Streamlit UI
