@@ -1,7 +1,41 @@
 import os
 import streamlit as st
 import yt_dlp
-import ffmpeg  # Gunakan pustaka ffmpeg-python
+import shutil
+import requests
+import zipfile
+
+# Fungsi untuk memastikan FFmpeg tersedia
+def setup_ffmpeg():
+    ffmpeg_path = shutil.which("ffmpeg")
+    if ffmpeg_path:
+        st.write("FFmpeg sudah tersedia.")
+        return ffmpeg_path
+
+    # Unduh FFmpeg jika tidak tersedia
+    st.write("Mengunduh FFmpeg...")
+    url = "https://github.com/yt-dlp/FFmpeg-Builds/releases/download/latest/ffmpeg-master-latest-linux64-gpl.zip"
+    ffmpeg_zip = "ffmpeg.zip"
+    ffmpeg_folder = "ffmpeg"
+
+    # Unduh file zip
+    response = requests.get(url, stream=True)
+    with open(ffmpeg_zip, "wb") as f:
+        for chunk in response.iter_content(chunk_size=1024):
+            if chunk:
+                f.write(chunk)
+
+    # Ekstrak FFmpeg
+    with zipfile.ZipFile(ffmpeg_zip, "r") as zip_ref:
+        zip_ref.extractall(ffmpeg_folder)
+
+    # Tambahkan lokasi FFmpeg ke PATH
+    ffmpeg_exe = os.path.join(ffmpeg_folder, "ffmpeg-master-latest-linux64-gpl", "bin", "ffmpeg")
+    os.environ["PATH"] += os.pathsep + os.path.dirname(ffmpeg_exe)
+    return ffmpeg_exe
+
+# Unduh FFmpeg saat runtime
+setup_ffmpeg()
 
 # Fungsi untuk mengunduh audio dari YouTube
 def download_youtube_audio(url, output_folder="downloads"):
