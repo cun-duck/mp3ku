@@ -1,10 +1,13 @@
-import imageio
 import os
-import yt_dlp
+import shutil
 import streamlit as st
+import yt_dlp
 
 # Pastikan FFmpeg tersedia
-os.environ["PATH"] += os.pathsep + imageio.plugins.ffmpeg.get_exe()
+ffmpeg_path = shutil.which("ffmpeg")
+if ffmpeg_path is None:
+    raise EnvironmentError("FFmpeg tidak ditemukan. Pastikan FFmpeg terinstal di lingkungan Anda.")
+os.environ["PATH"] += os.pathsep + os.path.dirname(ffmpeg_path)
 
 # Fungsi untuk mengunduh dan mengonversi video YouTube menjadi MP3
 def download_youtube_audio(url, output_folder="downloads"):
