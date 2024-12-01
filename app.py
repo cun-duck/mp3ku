@@ -1,29 +1,28 @@
 import streamlit as st
-from pytube import YouTube
-from pydub import AudioSegment
+import yt_dlp
 import os
 
-# Fungsi untuk mengunduh dan mengonversi audio
+# Fungsi untuk mengunduh dan mengonversi video YouTube menjadi MP3
 def download_youtube_audio(url, output_folder="downloads"):
+    if not os.path.exists(output_folder):
+        os.makedirs(output_folder)
+
+    # Konfigurasi yt-dlp
+    ydl_opts = {
+        'format': 'bestaudio/best',
+        'outtmpl': f'{output_folder}/%(title)s.%(ext)s',
+        'postprocessors': [{
+            'key': 'FFmpegExtractAudio',
+            'preferredcodec': 'mp3',
+            'preferredquality': '192',
+        }],
+    }
+
     try:
-        # Membuat folder output jika belum ada
-        if not os.path.exists(output_folder):
-            os.makedirs(output_folder)
-
-        # Mengunduh video YouTube
-        yt = YouTube(url)
-        video_stream = yt.streams.filter(only_audio=True).first()
-        downloaded_file = video_stream.download(output_path=output_folder)
-
-        # Mengonversi file audio ke MP3
-        base, ext = os.path.splitext(downloaded_file)
-        mp3_file = base + ".mp3"
-        AudioSegment.from_file(downloaded_file).export(mp3_file, format="mp3")
-
-        # Menghapus file asli (format non-MP3)
-        os.remove(downloaded_file)
-        return mp3_file
-
+        with yt_dlp.YoutubeDL(ydl_opts) as ydl:
+            info = ydl.extract_info(url, download=True)
+            mp3_file = os.path.join(output_folder, f"{info['title']}.mp3")
+            return mp3_file
     except Exception as e:
         st.error(f"Terjadi kesalahan: {e}")
         return None
@@ -39,7 +38,7 @@ if st.button("Unduh MP3"):
     if url:
         with st.spinner("Mengunduh dan mengonversi..."):
             mp3_file = download_youtube_audio(url)
-            if mp3_file:
+            if mp3_file and os.path.exists(mp3_file):
                 with open(mp3_file, "rb") as file:
                     st.success("Berhasil! Klik tombol di bawah untuk mengunduh file MP3.")
                     st.download_button(
@@ -48,6 +47,8 @@ if st.button("Unduh MP3"):
                         file_name=os.path.basename(mp3_file),
                         mime="audio/mp3",
                     )
-                os.remove(mp3_file)
+                os.remove(mp3_file)  # Hapus file setelah selesai
+            else:
+                st.error("Gagal mengunduh MP3.")
     else:
         st.error("Harap masukkan URL YouTube.")
