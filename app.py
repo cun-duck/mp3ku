@@ -1,6 +1,10 @@
-import streamlit as st
-import yt_dlp
+import imageio
 import os
+import yt_dlp
+import streamlit as st
+
+# Pastikan FFmpeg tersedia
+os.environ["PATH"] += os.pathsep + imageio.plugins.ffmpeg.get_exe()
 
 # Fungsi untuk mengunduh dan mengonversi video YouTube menjadi MP3
 def download_youtube_audio(url, output_folder="downloads"):
