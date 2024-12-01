@@ -3,3 +3,4 @@ pytube
 pydub
 ffmpeg-python
 yt-dlp
+imageio
