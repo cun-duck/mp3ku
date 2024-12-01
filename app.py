@@ -1,4 +1,4 @@
-import stremlit as st
+import streamlit as st
 import yt_dlp
 
 def download_audio(url, bitrate):
